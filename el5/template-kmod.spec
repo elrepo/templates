@@ -52,7 +52,6 @@ of the same variant of the Linux kernel and not on any one specific build.
 for kvariant in %{kvariants} ; do
     %{__cp} -a %{kmod_name}-%{version} _kmod_build_$kvariant
 done
-%{__cp} -a %{SOURCE5} .
 echo "/usr/lib/rpm/redhat/find-requires | %{__sed} -e '/^ksym.*/d'" > filter-requires.sh
 echo "override %{kmod_name} * weak-updates/%{kmod_name}" > kmod-%{kmod_name}.conf
 
@@ -73,7 +72,7 @@ done
 %{__install} -d %{buildroot}%{_sysconfdir}/depmod.d/
 %{__install} kmod-%{kmod_name}.conf %{buildroot}%{_sysconfdir}/depmod.d/
 %{__install} -d %{buildroot}%{_defaultdocdir}/kmod-%{kmod_name}-%{version}/
-%{__install} GPL-v2.0.txt %{buildroot}%{_defaultdocdir}/kmod-%{kmod_name}-%{version}/
+%{__install} %{SOURCE5} %{buildroot}%{_defaultdocdir}/kmod-%{kmod_name}-%{version}/
 # Set the module(s) to be executable, so that they will be stripped when packaged.
 find %{buildroot} -type f -name \*.ko -exec %{__chmod} u+x \{\} \;
 
@@ -81,5 +80,5 @@ find %{buildroot} -type f -name \*.ko -exec %{__chmod} u+x \{\} \;
 %{__rm} -rf %{buildroot}
 
 %changelog
-* Mon Dec 29 2010 Alan Bartlett <ajb@elrepo.org> - 0.0-1
+* Fri Mar 09 2012 Alan Bartlett <ajb@elrepo.org> - 0.0-1
 - Initial el5 build of the kmod package.
