@@ -2,7 +2,7 @@ The ELRepo Project (http://elrepo.org) templates git repository.
 
 This repository contains templates for the ELRepo Project that may be used to create kmod packages.
 
-Please note, these are only templates and some modifications may be required.
+Please note that these are only templates and some modifications may be required.
 Please look at other spec files for examples, or ask on the elrepo-devel mailing list.
 
 The ELRepo Project welcomes contributions and hopes that providing templates will help contributors.
