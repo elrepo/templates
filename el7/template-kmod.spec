@@ -12,6 +12,7 @@ License: GPLv2
 Summary: %{kmod_name} kernel module(s)
 URL:     http://www.kernel.org/
 
+BuildRequires: perl
 BuildRequires: redhat-rpm-config
 ExclusiveArch: x86_64
 
@@ -46,12 +47,24 @@ KSRC=%{_usrsrc}/kernels/%{kversion}
 %{__install} kmod-%{kmod_name}.conf %{buildroot}%{_sysconfdir}/depmod.d/
 %{__install} -d %{buildroot}%{_defaultdocdir}/kmod-%{kmod_name}-%{version}/
 %{__install} %{SOURCE5} %{buildroot}%{_defaultdocdir}/kmod-%{kmod_name}-%{version}/
-# Set the module(s) to be executable, so that they will be stripped when packaged.
-find %{buildroot} -type f -name \*.ko -exec %{__chmod} u+x \{\} \;
+
+# strip the modules(s)
+find %{buildroot} -type f -name \*.ko -exec %{__strip} --strip-debug \{\} \;
+
+# Sign the modules(s)
+%if %{?_with_modsign:1}%{!?_with_modsign:0}
+# If the module signing keys are not defined, define them here.
+%{!?privkey: %define privkey %{_sysconfdir}/pki/SECURE-BOOT-KEY.priv}
+%{!?pubkey: %define pubkey %{_sysconfdir}/pki/SECURE-BOOT-KEY.der}
+for module in $(find %{buildroot} -type f -name \*.ko);
+do %{__perl} /usr/src/kernels/%{kversion}/scripts/sign-file \
+sha256 %{privkey} %{pubkey} $module;
+done
+%endif
 
 %clean
 %{__rm} -rf %{buildroot}
 
 %changelog
-* Wed Jun 11 2014 Alan Bartlett <ajb@elrepo.org> - 0.0-1
+* Tue Jul 08 2014 Alan Bartlett <ajb@elrepo.org> - 0.0-1
 - Initial el7 build of the kmod package.
