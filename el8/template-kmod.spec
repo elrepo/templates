@@ -26,16 +26,16 @@ Source0:	%{kmod_name}-%{kmod_driver_version}.tar.gz
 %define sbindir %( if [ -d "/sbin" -a \! -h "/sbin" ]; then echo "/sbin"; else echo %{_sbindir}; fi )
 %define dup_state_dir %{_localstatedir}/lib/rpm-state/kmod-dups
 %define kver_state_dir %{dup_state_dir}/kver
-%define kver_state_file %{kver_state_dir}/%{kmod_kernel_version}.%(arch)
+%define kver_state_file %{kver_state_dir}/%{kmod_kernel_version}.%{arch}
 %define dup_module_list %{dup_state_dir}/rpm-kmod-%{kmod_name}-modules
 
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
-BuildRequires:	kernel-devel = %kmod_kernel_version redhat-rpm-config kernel-abi-whitelists
+BuildRequires:	kernel-devel = %{kmod_kernel_version} redhat-rpm-config kernel-abi-whitelists
 ExclusiveArch:	x86_64
-%global kernel_source() %{_usrsrc}/kernels/%{kmod_kernel_version}.%(arch)
+%global kernel_source() %{_usrsrc}/kernels/%{kmod_kernel_version}.%{arch}
 
 %global _use_internal_dependency_generator 0
-Provides:	kernel-modules = %kmod_kernel_version.%{_target_cpu}
+Provides:	kernel-modules = %{kmod_kernel_version}.%{_target_cpu}
 Provides:	kmod-%{kmod_name} = %{?epoch:%{epoch}:}%{version}-%{release}
 Requires(post):	%{sbindir}/weak-modules
 Requires(postun):	%{sbindir}/weak-modules
@@ -100,7 +100,7 @@ if rpm -q --filetriggers kmod 2> /dev/null| grep -q "Trigger for weak-modules ca
 fi
 
 mkdir -p "%{dup_state_dir}"
-rpm -ql kmod-%{kmod_name}-%{version}-%{release}.$(arch) | grep '\.ko$' > "%{dup_module_list}"
+rpm -ql kmod-%{kmod_name}-%{version}-%{release}.%{arch} | grep '\.ko$' > "%{dup_module_list}"
 
 %postun
 if rpm -q --filetriggers kmod 2> /dev/null| grep -q "Trigger for weak-modules call on kmod removal"; then
@@ -119,7 +119,7 @@ exit 0
 
 %files
 %defattr(644,root,root,755)
-/lib/modules/%{kmod_kernel_version}.%(arch)
+/lib/modules/%{kmod_kernel_version}.%{arch}
 /etc/depmod.d/%{kmod_name}.conf
 /usr/share/doc/kmod-%{kmod_name}/greylist.txt
 
