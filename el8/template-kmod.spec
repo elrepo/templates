@@ -25,22 +25,24 @@ Source5:	GPL-v2.0.txt
 %define __find_provides /usr/lib/rpm/redhat/find-provides.ksyms %{kmod_name} %{?epoch:%{epoch}:}%{version}-%{release}
 %define dup_state_dir %{_localstatedir}/lib/rpm-state/kmod-dups
 %define kver_state_dir %{dup_state_dir}/kver
-%define kver_state_file %{kver_state_dir}/%{kmod_kernel_version}.%{arch}
+%define kver_state_file %{kver_state_dir}/%{kmod_kernel_version}.%{_arch}
 %define dup_module_list %{dup_state_dir}/rpm-kmod-%{kmod_name}-modules
 %define debug_package %{nil}
 
 %global _use_internal_dependency_generator 0
-%global kernel_source() %{_usrsrc}/kernels/%{kmod_kernel_version}.%{arch}
+%global kernel_source() %{_usrsrc}/kernels/%{kmod_kernel_version}.%{_arch}
 
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 ExclusiveArch:	x86_64
 
+BuildRequires:	elfutils-libelf-devel
 BuildRequires:	kernel-devel = %{kmod_kernel_version}
 BuildRequires:	kernel-abi-whitelists
+BuildRequires:	kernel-rpm-macros
 BuildRequires:	redhat-rpm-config
 
-Provides:	kernel-modules = %{kmod_kernel_version}.%{_target_cpu}
+Provides:	kernel-modules >= %{kmod_kernel_version}.%{_arch}
 Provides:	kmod-%{kmod_name} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 Requires(post):	%{_sbindir}/weak-modules
@@ -72,13 +74,13 @@ done
 sort -u greylist | uniq > greylist.txt
 
 %install
-%{__install} -d %{buildroot}/lib/modules/%{kmod_kernel_version}.%{arch}/extra/%{kmod_name}/
-%{__install} %{kmod_name}.ko %{buildroot}/lib/modules/%{kmod_kernel_version}.%{arch}/extra/%{kmod_name}/
+%{__install} -d %{buildroot}/lib/modules/%{kmod_kernel_version}.%{_arch}/extra/%{kmod_name}/
+%{__install} %{kmod_name}.ko %{buildroot}/lib/modules/%{kmod_kernel_version}.%{_arch}/extra/%{kmod_name}/
 %{__install} -d %{buildroot}%{_sysconfdir}/depmod.d/
-%{__install} kmod-%{kmod_name}.conf %{buildroot}%{_sysconfdir}/depmod.d/
+%{__install} -m 0644 kmod-%{kmod_name}.conf %{buildroot}%{_sysconfdir}/depmod.d/
 %{__install} -d %{buildroot}%{_defaultdocdir}/kmod-%{kmod_name}-%{version}/
-%{__install} %{SOURCE5} %{buildroot}%{_defaultdocdir}/kmod-%{kmod_name}-%{version}/
-%{__install} greylist.txt %{buildroot}%{_defaultdocdir}/kmod-%{kmod_name}-%{version}/
+%{__install} -m 0644 %{SOURCE5} %{buildroot}%{_defaultdocdir}/kmod-%{kmod_name}-%{version}/
+%{__install} -m 0644 greylist.txt %{buildroot}%{_defaultdocdir}/kmod-%{kmod_name}-%{version}/
 
 # strip the modules(s)
 find %{buildroot} -type f -name \*.ko -exec %{__strip} --strip-debug \{\} \;
@@ -87,7 +89,7 @@ find %{buildroot} -type f -name \*.ko -exec %{__strip} --strip-debug \{\} \;
 %{__rm} -rf %{buildroot}
 
 %post
-modules=( $(find /lib/modules/%{kmod_kernel_version}.x86_64/extra/kmod-%{kmod_name} | grep '\.ko$') )
+modules=( $(find /lib/modules/%{kmod_kernel_version}.x86_64/extra/%{kmod_name} | grep '\.ko$') )
 printf '%s\n' "${modules[@]}" | %{_sbindir}/weak-modules --add-modules --no-initramfs
 
 mkdir -p "%{kver_state_dir}"
@@ -136,7 +138,7 @@ if rpm -q --filetriggers kmod 2> /dev/null| grep -q "Trigger for weak-modules ca
 fi
 
 mkdir -p "%{dup_state_dir}"
-rpm -ql kmod-%{kmod_name}-%{version}-%{release}.%{arch} | grep '\.ko$' > "%{dup_module_list}"
+rpm -ql kmod-%{kmod_name}-%{version}-%{release}.%{_arch} | grep '\.ko$' > "%{dup_module_list}"
 
 %postun
 if rpm -q --filetriggers kmod 2> /dev/null| grep -q "Trigger for weak-modules call on kmod removal"; then
@@ -155,8 +157,8 @@ exit 0
 
 %files
 %defattr(644,root,root,755)
-/lib/modules/%{kmod_kernel_version}.%{arch}/
-config /etc/depmod.d/kmod-%{kmod_name}.conf
+/lib/modules/%{kmod_kernel_version}.%{_arch}/
+%config /etc/depmod.d/kmod-%{kmod_name}.conf
 %doc /usr/share/doc/kmod-%{kmod_name}-%{version}/
 
 %changelog
