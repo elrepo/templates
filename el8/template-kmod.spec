@@ -120,8 +120,8 @@ exit 0
 %files
 %defattr(644,root,root,755)
 /lib/modules/%{kmod_kernel_version}.%{arch}/
-config /etc/depmod.d/kmod-${kmod_name}.conf
-%doc /usr/share/doc/kmod-${kmod_name}-%{version}/
+config /etc/depmod.d/kmod-%{kmod_name}.conf
+%doc /usr/share/doc/kmod-%{kmod_name}-%{version}/
 
 %prep
 %setup -n %{kmod_name}-%{version}
