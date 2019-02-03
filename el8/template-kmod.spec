@@ -3,7 +3,6 @@
 %define kmod_driver_version	0.0
 %define kmod_rpm_release	1
 %define kmod_kernel_version	4.18.0-32.el8
-# % define kmod_kbuild_dir		drivers/net/ethernet/intel/i40evf
 %define kmod_dependencies       %{nil}
 %define kmod_build_dependencies	%{nil}
 %define kmod_devel_package	0
@@ -57,8 +56,7 @@ Requires:       %{kmod_dependencies}
 ## Conflicts:	kmod-%{kmod_name}
 
 %description
-This package provides the %{kmod_name} kernel module(s) for the
-Intel® 82563/6/7, 82571/2/3/4/7/8/9 and 82583 PCI-E based Ethernet NICs.
+This package provides the %{kmod_name} kernel module(s).
 It is built to depend upon the specific ABI provided by a range of releases
 of the same variant of the Linux kernel and not on any one specific build.
 
@@ -149,11 +147,9 @@ EXTRA_CFLAGS="-mindirect-branch=thunk-inline -mindirect-branch-register" \
 %{nil}
 
 # mark modules executable so that strip-to-file can strip them
-### find obj/%{kmod_kbuild_dir} -name "*.ko" -type f -exec chmod u+x '{}' +
 find . -name "*.ko" -type f -exec chmod u+x '{}' +
 
 whitelist="/lib/modules/kabi-current/kabi_whitelist_%{_target_cpu}"
-### for modules in $( find obj/%{kmod_kbuild_dir} -name "*.ko" -type f -printf "%{findpat}\n" | sed 's|\.ko$||' | sort -u ) ; do
 for modules in $( find . -name "*.ko" -type f -printf "%{findpat}\n" | sed 's|\.ko$||' | sort -u ) ; do
 	# update depmod.conf
 	module_weak_path=$(echo $modules | sed 's/[\/]*[^\/]*$//')
@@ -164,8 +160,7 @@ for modules in $( find . -name "*.ko" -type f -printf "%{findpat}\n" | sed 's|\.
 	fi
 	echo "override $(echo $modules | sed 's/.*\///') $(echo %{kmod_kernel_version} | sed 's/\.[^\.]*$//').* weak-updates/$module_weak_path" >> depmod.conf
 
-	# update greylist
-### 	nm -u obj/%{kmod_kbuild_dir}/$modules.ko | sed 's/.*U //' |  sed 's/^\.//' | sort -u | while read -r symbol; do
+# update greylist
 nm -u ./$modules.ko | sed 's/.*U //' |  sed 's/^\.//' | sort -u | while read -r symbol; do
 		grep -q "^\s*$symbol\$" $whitelist || echo "$symbol" >> ./greylist
 	done
