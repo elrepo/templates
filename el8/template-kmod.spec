@@ -50,6 +50,52 @@ This package provides the %{kmod_name} kernel module(s).
 It is built to depend upon the specific ABI provided by a range of releases
 of the same variant of the Linux kernel and not on any one specific build.
 
+%prep
+%setup -n %{kmod_name}-%{version}
+
+# Apply patch(es)
+# % patch0 -p1
+
+%build
+%{make_build} -C %{kernel_source} V=1 M=$PWD \
+EXTRA_CFLAGS="-mindirect-branch=thunk-inline -mindirect-branch-register" \
+%{nil}
+
+# mark modules executable so that strip-to-file can strip them
+find . -name "*.ko" -type f -exec chmod u+x '{}' +
+
+whitelist="/lib/modules/kabi-current/kabi_whitelist_%{_target_cpu}"
+for modules in $( find . -name "*.ko" -type f -printf "%{findpat}\n" | sed 's|\.ko$||' | sort -u ) ; do
+	# update depmod.conf
+	module_weak_path=$(echo $modules | sed 's/[\/]*[^\/]*$//')
+	if [ -z "$module_weak_path" ]; then
+		module_weak_path=%{name}
+	else
+		module_weak_path=%{name}/$module_weak_path
+	fi
+	echo "override $(echo $modules | sed 's/.*\///') $(echo %{kmod_kernel_version} | sed 's/\.[^\.]*$//').* weak-updates/$module_weak_path" >> depmod.conf
+
+# update greylist
+nm -u ./$modules.ko | sed 's/.*U //' |  sed 's/^\.//' | sort -u | while read -r symbol; do
+		grep -q "^\s*$symbol\$" $whitelist || echo "$symbol" >> ./greylist
+	done
+done
+sort -u greylist | uniq > greylist.txt
+
+%install
+export INSTALL_MOD_PATH=$RPM_BUILD_ROOT
+export INSTALL_MOD_DIR=extra/%{name}
+make -C %{kernel_source} modules_install \
+	M=$PWD
+# Cleanup unnecessary kernel-generated module dependency files.
+find $INSTALL_MOD_PATH/lib/modules -iname 'modules.*' -exec rm {} \;
+
+install -m 644 -D depmod.conf $RPM_BUILD_ROOT/etc/depmod.d/kmod-${kmod_name}.conf
+install -m 644 -D greylist.txt $RPM_BUILD_ROOT/usr/share/doc/kmod-%{kmod_name}/greylist.txt
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
 %post
 modules=( $(find /lib/modules/%{kmod_kernel_version}.x86_64/extra/kmod-%{kmod_name} | grep '\.ko$') )
 printf '%s\n' "${modules[@]}" | %{_sbindir}/weak-modules --add-modules --no-initramfs
@@ -122,53 +168,6 @@ exit 0
 /lib/modules/%{kmod_kernel_version}.%{arch}/
 config /etc/depmod.d/kmod-%{kmod_name}.conf
 %doc /usr/share/doc/kmod-%{kmod_name}-%{version}/
-
-%prep
-%setup -n %{kmod_name}-%{version}
-
-# Apply patch(es)
-# % patch0 -p1
-
-%build
-
-%{make_build} -C %{kernel_source} V=1 M=$PWD \
-EXTRA_CFLAGS="-mindirect-branch=thunk-inline -mindirect-branch-register" \
-%{nil}
-
-# mark modules executable so that strip-to-file can strip them
-find . -name "*.ko" -type f -exec chmod u+x '{}' +
-
-whitelist="/lib/modules/kabi-current/kabi_whitelist_%{_target_cpu}"
-for modules in $( find . -name "*.ko" -type f -printf "%{findpat}\n" | sed 's|\.ko$||' | sort -u ) ; do
-	# update depmod.conf
-	module_weak_path=$(echo $modules | sed 's/[\/]*[^\/]*$//')
-	if [ -z "$module_weak_path" ]; then
-		module_weak_path=%{name}
-	else
-		module_weak_path=%{name}/$module_weak_path
-	fi
-	echo "override $(echo $modules | sed 's/.*\///') $(echo %{kmod_kernel_version} | sed 's/\.[^\.]*$//').* weak-updates/$module_weak_path" >> depmod.conf
-
-# update greylist
-nm -u ./$modules.ko | sed 's/.*U //' |  sed 's/^\.//' | sort -u | while read -r symbol; do
-		grep -q "^\s*$symbol\$" $whitelist || echo "$symbol" >> ./greylist
-	done
-done
-sort -u greylist | uniq > greylist.txt
-
-%install
-export INSTALL_MOD_PATH=$RPM_BUILD_ROOT
-export INSTALL_MOD_DIR=extra/%{name}
-make -C %{kernel_source} modules_install \
-	M=$PWD
-# Cleanup unnecessary kernel-generated module dependency files.
-find $INSTALL_MOD_PATH/lib/modules -iname 'modules.*' -exec rm {} \;
-
-install -m 644 -D depmod.conf $RPM_BUILD_ROOT/etc/depmod.d/kmod-${kmod_name}.conf
-install -m 644 -D greylist.txt $RPM_BUILD_ROOT/usr/share/doc/kmod-%{kmod_name}/greylist.txt
-
-%clean
-rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Feb 01 2019 Akemi Yagi <toracat@elrepo.org> 0.0-1
