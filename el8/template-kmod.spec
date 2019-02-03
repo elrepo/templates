@@ -107,8 +107,7 @@ if rpm -q --filetriggers kmod 2> /dev/null| grep -q "Trigger for weak-modules ca
 fi
 
 mkdir -p "%{dup_state_dir}"
-rpm -ql kmod-redhat-i40evf-%{version}-%{release}.$(arch) | \
-	grep '\.ko$' > "%{dup_module_list}"
+rpm -ql kmod-%{kmod_name}-%{version}-%{release}.$(arch) | grep '\.ko$' > "%{dup_module_list}"
 
 %postun
 if rpm -q --filetriggers kmod 2> /dev/null| grep -q "Trigger for weak-modules call on kmod removal"; then
