@@ -1,4 +1,6 @@
 %define kmod_name		PHOO
+%define kmod_kernel_version	4.18.0-32.el8
+
 %{!?dist: %define dist .el8}
 %{!?make_build: %define make_build make}
 
@@ -9,11 +11,6 @@ Summary:	%{kmod_name} kernel module(s)
 Group:		System Environment/Kernel
 License:	GPLv2
 URL:		http://www.kernel.org/
-
-%define kmod_kernel_version	4.18.0-32.el8
-%define kmod_dependencies       %{nil}
-%define kmod_build_dependencies	%{nil}
-%define kmod_devel_package	0
 
 # Sources
 Source0:	%{kmod_name}-%{kmod_driver_version}.tar.gz
@@ -40,13 +37,6 @@ Provides:	kmod-%{kmod_name} = %{?epoch:%{epoch}:}%{version}-%{release}
 Requires(post):	%{sbindir}/weak-modules
 Requires(postun):	%{sbindir}/weak-modules
 Requires:	kernel >= 3.10.0-957.el7
-
-%if "%{kmod_build_dependencies}" != ""
-BuildRequires:  %{kmod_build_dependencies}
-%endif
-%if "%{kmod_dependencies}" != ""
-Requires:       %{kmod_dependencies}
-%endif
 
 # if there are multiple kmods for the same driver from different vendors,
 # they should conflict with each other.
