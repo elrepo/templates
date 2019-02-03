@@ -28,21 +28,23 @@ Source5:	GPL-v2.0.txt
 %define kver_state_file %{kver_state_dir}/%{kmod_kernel_version}.%{arch}
 %define dup_module_list %{dup_state_dir}/rpm-kmod-%{kmod_name}-modules
 
-BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
-BuildRequires:	kernel-devel = %{kmod_kernel_version} redhat-rpm-config kernel-abi-whitelists
-ExclusiveArch:	x86_64
+%global _use_internal_dependency_generator 0
 %global kernel_source() %{_usrsrc}/kernels/%{kmod_kernel_version}.%{arch}
 
-%global _use_internal_dependency_generator 0
+BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
+
+ExclusiveArch:	x86_64
+
+BuildRequires:	kernel-devel = %{kmod_kernel_version}
+BuildRequires:	kernel-abi-whitelists
+BuildRequires:	redhat-rpm-config
+
 Provides:	kernel-modules = %{kmod_kernel_version}.%{_target_cpu}
 Provides:	kmod-%{kmod_name} = %{?epoch:%{epoch}:}%{version}-%{release}
+
 Requires(post):	%{_sbindir}/weak-modules
 Requires(postun):	%{_sbindir}/weak-modules
 Requires:	kernel >= %{kmod_kernel_version}
-
-# if there are multiple kmods for the same driver from different vendors,
-# they should conflict with each other.
-## Conflicts:	kmod-%{kmod_name}
 
 %description
 This package provides the %{kmod_name} kernel module(s).
