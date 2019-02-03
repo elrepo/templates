@@ -38,7 +38,7 @@ Provides:	kernel-modules = %{kmod_kernel_version}.%{_target_cpu}
 Provides:	kmod-%{kmod_name} = %{?epoch:%{epoch}:}%{version}-%{release}
 Requires(post):	%{_sbindir}/weak-modules
 Requires(postun):	%{_sbindir}/weak-modules
-Requires:	kernel >= 3.10.0-957.el7
+Requires:	kernel >= %{kmod_kernel_version}
 
 # if there are multiple kmods for the same driver from different vendors,
 # they should conflict with each other.
@@ -89,8 +89,8 @@ export INSTALL_MOD_DIR=extra/%{name}
 # Cleanup unnecessary kernel-generated module dependency files.
 find $INSTALL_MOD_PATH/lib/modules -iname 'modules.*' -exec rm {} \;
 
-install -m 644 -D depmod.conf $RPM_BUILD_ROOT/etc/depmod.d/kmod-${kmod_name}.conf
-install -m 644 -D greylist.txt $RPM_BUILD_ROOT/usr/share/doc/kmod-%{kmod_name}/greylist.txt
+%{__install} -m 644 -D depmod.conf $RPM_BUILD_ROOT/etc/depmod.d/kmod-${kmod_name}.conf
+%{__install} -m 644 -D greylist.txt $RPM_BUILD_ROOT/usr/share/doc/kmod-%{kmod_name}/greylist.txt
 
 %clean
 rm -rf $RPM_BUILD_ROOT
