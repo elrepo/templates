@@ -27,6 +27,7 @@ Source5:	GPL-v2.0.txt
 %define kver_state_dir %{dup_state_dir}/kver
 %define kver_state_file %{kver_state_dir}/%{kmod_kernel_version}.%{arch}
 %define dup_module_list %{dup_state_dir}/rpm-kmod-%{kmod_name}-modules
+%define debug_package %{nil}
 
 %global _use_internal_dependency_generator 0
 %global kernel_source() %{_usrsrc}/kernels/%{kmod_kernel_version}.%{arch}
