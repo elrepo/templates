@@ -1,5 +1,8 @@
+# Define the kmod package name here.
 %define kmod_name		PHOO
-%define kmod_kernel_version	4.18.0-32.el8
+
+# If kmod_kernel_version isn't defined on the rpmbuild line, define it here.
+%{!?kmod_kernel_version: %define kmod_kernel_version 4.18.0-32.el8}
 
 %{!?dist: %define dist .el8}
 %{!?make_build: %define make_build make}
