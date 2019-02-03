@@ -17,6 +17,7 @@ URL:		http://www.kernel.org/
 
 # Sources
 Source0:	%{kmod_name}-%{version}.tar.gz
+Source5:	GPL-v2.0.txt
 
 # Source code patches
 
@@ -118,9 +119,9 @@ exit 0
 
 %files
 %defattr(644,root,root,755)
-/lib/modules/%{kmod_kernel_version}.%{arch}
-/etc/depmod.d/%{kmod_name}.conf
-/usr/share/doc/kmod-%{kmod_name}/greylist.txt
+/lib/modules/%{kmod_kernel_version}.%{arch}/
+config /etc/depmod.d/kmod-${kmod_name}.conf
+%doc /usr/share/doc/kmod-${kmod_name}-%{version}/
 
 %prep
 %setup -n %{kmod_name}-%{version}
@@ -163,7 +164,7 @@ make -C %{kernel_source} modules_install \
 # Cleanup unnecessary kernel-generated module dependency files.
 find $INSTALL_MOD_PATH/lib/modules -iname 'modules.*' -exec rm {} \;
 
-install -m 644 -D depmod.conf $RPM_BUILD_ROOT/etc/depmod.d/%{kmod_name}.conf
+install -m 644 -D depmod.conf $RPM_BUILD_ROOT/etc/depmod.d/kmod-${kmod_name}.conf
 install -m 644 -D greylist.txt $RPM_BUILD_ROOT/usr/share/doc/kmod-%{kmod_name}/greylist.txt
 
 %clean
