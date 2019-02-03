@@ -16,7 +16,7 @@ License:	GPLv2
 URL:		http://www.kernel.org/
 
 # Sources
-Source0:	%{kmod_name}-%{kmod_driver_version}.tar.gz
+Source0:	%{kmod_name}-%{version}.tar.gz
 
 # Source code patches
 
