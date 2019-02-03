@@ -23,7 +23,6 @@ Source0:	%{kmod_name}-%{version}.tar.gz
 %define findpat %( echo "%""P" )
 %define __find_requires /usr/lib/rpm/redhat/find-requires.ksyms
 %define __find_provides /usr/lib/rpm/redhat/find-provides.ksyms %{kmod_name} %{?epoch:%{epoch}:}%{version}-%{release}
-%define sbindir %( if [ -d "/sbin" -a \! -h "/sbin" ]; then echo "/sbin"; else echo %{_sbindir}; fi )
 %define dup_state_dir %{_localstatedir}/lib/rpm-state/kmod-dups
 %define kver_state_dir %{dup_state_dir}/kver
 %define kver_state_file %{kver_state_dir}/%{kmod_kernel_version}.%{arch}
@@ -37,8 +36,8 @@ ExclusiveArch:	x86_64
 %global _use_internal_dependency_generator 0
 Provides:	kernel-modules = %{kmod_kernel_version}.%{_target_cpu}
 Provides:	kmod-%{kmod_name} = %{?epoch:%{epoch}:}%{version}-%{release}
-Requires(post):	%{sbindir}/weak-modules
-Requires(postun):	%{sbindir}/weak-modules
+Requires(post):	%{_sbindir}/weak-modules
+Requires(postun):	%{_sbindir}/weak-modules
 Requires:	kernel >= 3.10.0-957.el7
 
 # if there are multiple kmods for the same driver from different vendors,
@@ -52,7 +51,7 @@ of the same variant of the Linux kernel and not on any one specific build.
 
 %post
 modules=( $(find /lib/modules/%{kmod_kernel_version}.x86_64/extra/kmod-%{kmod_name} | grep '\.ko$') )
-printf '%s\n' "${modules[@]}" | %{sbindir}/weak-modules --add-modules --no-initramfs
+printf '%s\n' "${modules[@]}" | %{_sbindir}/weak-modules --add-modules --no-initramfs
 
 mkdir -p "%{kver_state_dir}"
 touch "%{kver_state_file}"
@@ -111,7 +110,7 @@ fi
 
 modules=( $(cat "%{dup_module_list}") )
 rm -f "%{dup_module_list}"
-printf '%s\n' "${modules[@]}" | %{sbindir}/weak-modules --remove-modules $initramfs_opt
+printf '%s\n' "${modules[@]}" | %{_sbindir}/weak-modules --remove-modules $initramfs_opt
 
 rmdir "%{dup_state_dir}" 2> /dev/null
 
