@@ -1,14 +1,19 @@
 %define kmod_name		PHOO
-# % define kmod_vendor		
-%define kmod_driver_version	0.0
-%define kmod_rpm_release	1
+%{!?dist: %define dist .el8}
+%{!?make_build: %define make_build make}
+
+Name:		kmod-%{kmod_name}
+Version:	0.0
+Release:	1%{?dist}
+Summary:	%{kmod_name} kernel module(s)
+Group:		System Environment/Kernel
+License:	GPLv2
+URL:		http://www.kernel.org/
+
 %define kmod_kernel_version	4.18.0-32.el8
 %define kmod_dependencies       %{nil}
 %define kmod_build_dependencies	%{nil}
 %define kmod_devel_package	0
-
-%{!?dist: %define dist .el8}
-%{!?make_build: %define make_build make}
 
 # Sources
 Source0:	%{kmod_name}-%{kmod_driver_version}.tar.gz
@@ -23,14 +28,6 @@ Source0:	%{kmod_name}-%{kmod_driver_version}.tar.gz
 %define kver_state_dir %{dup_state_dir}/kver
 %define kver_state_file %{kver_state_dir}/%{kmod_kernel_version}.%(arch)
 %define dup_module_list %{dup_state_dir}/rpm-kmod-%{kmod_name}-modules
-
-Name:		kmod-%{kmod_name}
-Version:	%{kmod_driver_version}
-Release:	%{kmod_rpm_release}%{?dist}
-Summary:	%{kmod_name} kernel module(s)
-Group:		System Environment/Kernel
-License:	GPLv2
-URL:		http://www.kernel.org/
 
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 BuildRequires:	kernel-devel = %kmod_kernel_version redhat-rpm-config kernel-abi-whitelists
@@ -110,7 +107,7 @@ if rpm -q --filetriggers kmod 2> /dev/null| grep -q "Trigger for weak-modules ca
 fi
 
 mkdir -p "%{dup_state_dir}"
-rpm -ql kmod-redhat-i40evf-%{kmod_driver_version}-%{kmod_rpm_release}%{?dist}.$(arch) | \
+rpm -ql kmod-redhat-i40evf-%{version}-%{release}.$(arch) | \
 	grep '\.ko$' > "%{dup_module_list}"
 
 %postun
@@ -135,7 +132,7 @@ exit 0
 /usr/share/doc/kmod-%{kmod_name}/greylist.txt
 
 %prep
-%setup -n %{kmod_name}-%{kmod_driver_version}
+%setup -n %{kmod_name}-%{version}
 
 # Apply patch(es)
 # % patch0 -p1
