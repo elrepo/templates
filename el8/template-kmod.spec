@@ -5,7 +5,6 @@
 %{!?kmod_kernel_version: %define kmod_kernel_version 4.18.0-32.el8}
 
 %{!?dist: %define dist .el8}
-%{!?make_build: %define make_build make}
 
 Name:		kmod-%{kmod_name}
 Version:	0.0
@@ -57,7 +56,7 @@ of the same variant of the Linux kernel and not on any one specific build.
 # % patch0 -p1
 
 %build
-%{make_build} -C %{kernel_source} V=1 M=$PWD \
+%{__make} -C %{kernel_source} V=1 M=$PWD \
 EXTRA_CFLAGS="-mindirect-branch=thunk-inline -mindirect-branch-register" \
 %{nil}
 
@@ -85,7 +84,7 @@ sort -u greylist | uniq > greylist.txt
 %install
 export INSTALL_MOD_PATH=$RPM_BUILD_ROOT
 export INSTALL_MOD_DIR=extra/%{name}
-make -C %{kernel_source} modules_install \
+%{__make} -C %{kernel_source} modules_install \
 	M=$PWD
 # Cleanup unnecessary kernel-generated module dependency files.
 find $INSTALL_MOD_PATH/lib/modules -iname 'modules.*' -exec rm {} \;
