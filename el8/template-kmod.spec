@@ -85,6 +85,17 @@ sort -u greylist | uniq > greylist.txt
 # strip the modules(s)
 find %{buildroot} -type f -name \*.ko -exec %{__strip} --strip-debug \{\} \;
 
+# Sign the modules(s)
+%if %{?_with_modsign:1}%{!?_with_modsign:0}
+# If the module signing keys are not defined, define them here.
+%{!?privkey: %define privkey %{_sysconfdir}/pki/SECURE-BOOT-KEY.priv}
+%{!?pubkey: %define pubkey %{_sysconfdir}/pki/SECURE-BOOT-KEY.der}
+for module in $(find %{buildroot} -type f -name \*.ko);
+do %{_usrsrc}/kernels/%{kmod_kernel_version}.%{_arch}/scripts/sign-file \
+sha256 %{privkey} %{pubkey} $module;
+done
+%endif
+
 %clean
 %{__rm} -rf %{buildroot}
 
