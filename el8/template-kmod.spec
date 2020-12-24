@@ -57,7 +57,7 @@ of the same variant of the Linux kernel and not on any one specific build.
 %prep
 %setup -q -n %{kmod_name}-%{version}
 echo "override %{kmod_name} * weak-updates/%{kmod_name}" > kmod-%{kmod_name}.conf
-echo "add_drivers+=\" %{kmod_name} \"" > %{kmod_name}.conf
+# echo "add_drivers+=\" %%{kmod_name} \"" > %%{kmod_name}.conf
 
 # Apply patch(es)
 # % patch0 -p1
@@ -172,13 +172,13 @@ exit 0
 %files
 %defattr(644,root,root,755)
 /lib/modules/%{kmod_kernel_version}.%{_arch}/
-%config /etc/depmod.d/kmod-%{kmod_name}.conf
-%config /etc/dracut.conf.d/%{kmod_name}.conf
+# %%config /etc/depmod.d/kmod-%%{kmod_name}.conf
+# %%config /etc/dracut.conf.d/%%{kmod_name}.conf
 %doc /usr/share/doc/kmod-%{kmod_name}-%{version}/
 
 %changelog
 * Mon Nov 09 2020 Akemi Yagi <toracat@elrepo.org> - 0.0-2
-- Add dracut conf file to ensure module is in initramfs
+- Add dracut conf file to ensure module is in initramfs (commented out)
 
 * Sat Jun 15 2019 Philip J Perry <phil@elrepo.org> 0.0-1
 - Initial el8 build of the kmod package.
