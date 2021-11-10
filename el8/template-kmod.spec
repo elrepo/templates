@@ -95,7 +95,7 @@ sort -u greylist | uniq > greylist.txt
 %{__install} -m 0644 greylist.txt %{buildroot}%{_defaultdocdir}/kmod-%{kmod_name}-%{version}/
 
 # strip the modules(s)
-find %{buildroot} -type f -name \*.ko -exec %{__strip} --strip-debug \{\} \;
+find %{buildroot} -name \*.ko -type f | xargs --no-run-if-empty %{__strip} --strip-debug
 
 # Sign the modules(s)
 %if %{?_with_modsign:1}%{!?_with_modsign:0}
