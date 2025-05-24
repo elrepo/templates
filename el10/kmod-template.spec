@@ -186,3 +186,4 @@ exit 0
 %changelog
 * Tue Dec 17 2024 Akemi Yagi <toracat@elrepo.org> - 0.0-1
 - Initial build for RHEL 10
+- Source code from kernel-6.12.0-55.9.1.el10_0
