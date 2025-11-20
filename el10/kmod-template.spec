@@ -180,8 +180,8 @@ exit 0
 %files
 %defattr(644,root,root,755)
 /lib/modules/%{kmod_kernel_version}.%{_arch}/
-%config /etc/depmod.d/kmod-%{kmod_name}.conf
-%doc /usr/share/doc/kmod-%{kmod_name}-%{version}/
+%config %{_sysconfdir}/depmod.d/kmod-%{kmod_name}.conf
+%doc %{_defaultdocdir}/kmod-%{kmod_name}-%{version}/
 
 %changelog
 * Tue Dec 17 2024 Akemi Yagi <toracat@elrepo.org> - 0.0-1
