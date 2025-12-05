@@ -124,7 +124,7 @@ exit 0
 # calling initramfs regeneration separately
 if [ -f "%{kver_state_file}" ]; then
         kver_base="%{kmod_kernel_version}"
-        kvers=$(ls -d "/lib/modules/${kver_base%%.*}"*)
+        kvers=$(ls -d "/lib/modules/${kver_base%%%%-*}"*)
 
         for k_dir in $kvers; do
                 k="${k_dir#/lib/modules/}"
@@ -134,7 +134,7 @@ if [ -f "%{kver_state_file}" ]; then
 
                 # The same check as in weak-modules: we assume that the kernel present
                 # if the symvers file exists.
-                if [ -e "/$k_dir/symvers.gz" ]; then
+                if [ -e "/$k_dir/symvers.xz" ]; then
                         /usr/bin/dracut -f "$tmp_initramfs" "$k" || exit 1
                         cmp -s "$tmp_initramfs" "$dst_initramfs"
                         if [ "$?" = 1 ]; then
