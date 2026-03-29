@@ -18,6 +18,9 @@ URL:		http://www.kernel.org/
 Source0:	%{kmod_name}-%{version}.tar.gz
 Source5:	GPL-v2.0.txt
 
+# Source code patches.
+Patch0: elrepo-bugXXXX.patch
+
 # Fix for the SB-signing issue caused by a bug in /usr/lib/rpm/brp-strip
 # https://bugzilla.redhat.com/show_bug.cgi?id=1967291
 
@@ -70,8 +73,8 @@ of the same variant of the Linux kernel and not on any one specific build.
 %setup -q -n %{kmod_name}-%{version}
 echo "override %{kmod_name} * weak-updates/%{kmod_name}" > kmod-%{kmod_name}.conf
 
-# Apply patch(es)
-# % patch0 -p1
+# Apply patch(es).
+%patch -P0 -p1
 
 %build
 %{__make} -C %{kernel_source} %{?_smp_mflags} modules M=$PWD
